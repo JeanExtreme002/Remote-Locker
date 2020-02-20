@@ -1,21 +1,16 @@
+const router = require("./route/routes");
 const express = require("express");
+const bodyParser = require("body-parser");
 const app = express();
 
-var status = false;
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
 
-// Rota para bloquear o dispositivo.
-app.get("/lock", function(request, response){
-    status = true;
-    response.send("Locked");
-});
-
-// Rota principal para verificação.
-app.get("/", function(request, response){
-    response.send(status);
-    status = false;
-});
+app.use(router);
 
 const PORT = process.env.PORT || 5000;
+
+app.use(express.static("static"));
 
 app.listen(PORT, function(){
     console.log(`Running server on port ${PORT}`);
