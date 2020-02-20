@@ -5,6 +5,7 @@ import ctypes
 import json
 import os
 import requests
+import time
 
 
 def close(*args):
@@ -46,31 +47,35 @@ config = get_config("config.json")
 if not config: os._exit(1)
 
 host = config["host"]
+update = config["update"]
 
 # Obtém token de acesso.
 token = get_token("token.txt")
 
-status = False
+status = -1
 stop = False
 
 # Cria um ícone de bandeja.
 systray = SysTrayIcon("icon.ico", "Locker (OFFLINE)", (("Set Password", None, set_password),), on_quit = close )
 systray.start()
 
-
 # Executa enquanto não for pedido para fechar o programa.
 while not stop:
+
+    # Espera um tempo a cada volta do bloco while.
+    time.sleep(update / 1000)
 
     try:
         response = requests.post(host, json = {"token": token})
 
         # Verifica se o servidor está funcionando.
-        if response.status_code in [200, 403]: 
+        if response.status_code in [200, 403] and status != response.status_code: 
             systray.update(hover_text = "Locker (online : {})".format(response.status_code))
-            
-        else:
+
+        elif status != response.status_code:
             systray.update(hover_text = "Locker (offline : {})".format(response.status_code))
 
+        status = response.status_code
 
         # Bloqueia o computador caso a resposta for "true".
         if response.content.decode() == "true":
@@ -79,7 +84,8 @@ while not stop:
     except:
 
         # Informa que o servidor está offline.
-        if status:
+        if status != -1:
             systray.update(hover_text = "Locker (OFFLINE)")
-            status = False
+            status = -1
 
+systray.shutdown()

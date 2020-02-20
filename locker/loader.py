@@ -11,7 +11,8 @@ def get_config(filename = "config.json"):
 
     # Configuração padrão.
     config = {
-        "host": "http://localhost:5000"
+        "host": "http://localhost:5000",
+        "update": 1000
         }
 
     # Tenta abrir o arquivo de configurações.
