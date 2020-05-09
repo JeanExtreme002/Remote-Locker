@@ -12,7 +12,13 @@ class Locker(object):
         self.__token = token
 
 
-    def __get_status(self, response):
+    def get_offline_message(self):
+
+        # Informa que o servidor não está funcionando.
+        return "Locker (OFFLINE)"
+
+
+    def get_status_message(self, response):
 
         # Informa que o Locker está funcionando.
         if response.ok: 
@@ -21,12 +27,6 @@ class Locker(object):
         # Informa que o Locker não está funcionando mas o servidor continua ativo.
         else:
             return "Locker (offline : {})".format(response.status_code)
-
-
-    def get_offline_message(self):
-
-        # Informa que o servidor não está funcionando.
-        return "Locker (OFFLINE)"
 
 
     def run(self, status_callback, update = 1000):
@@ -46,7 +46,7 @@ class Locker(object):
                 # Envia o novo status do servidor
                 if response.status_code != self.__status:
                     self.__status = response.status_code
-                    status_callback(self.__get_status(response))
+                    status_callback(self.get_status_message(response))
 
                 # Bloqueia o computador caso a resposta seja "true".
                 if response.content.decode() == "true":
@@ -68,7 +68,7 @@ class Locker(object):
 
         try:
             # Envia a nova senha junto com o token de acesso.
-            response = requests.post(self.__host + "/new", json = {"token": self.__token, "password": pwd})
+            response = requests.post(self.__host + "/set", json = {"token": self.__token, "password": pwd})
 
             # Verifica se houve um erro com o token de acesso.
             if response.status_code == 403:
