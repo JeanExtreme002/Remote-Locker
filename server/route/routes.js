@@ -5,6 +5,9 @@ const router = express.Router();
 var path = require('path');
 var status = false;
 
+// Pasta pública.
+router.use(express.static("public"));
+
 
 // Rota principal.
 router.get("/", function(request, response){
